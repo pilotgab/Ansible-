@@ -1,0 +1,69 @@
+---
+# tasks file for post-install
+- name: installing packges on centos
+  ansible.builtin.yum:
+    name: "{{item}}"
+    state: present
+  when: ansible_distribution == "CentOS"
+  loop:
+    - chrony
+    - wget
+    - git
+    - zip
+    - unzip
+
+- name: install ntp on ubuntu os
+  ansible.builtin.apt:
+    name: "{{item}}"
+    state: present
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+  loop:
+    - ntp
+    - wget
+    - git
+    - zip
+    - unzip
+
+- name: start chronyd service on centos
+  service:
+    name: chronyd
+    state: started
+    enabled: yes
+  when: ansible_distribution == "CentOS"
+
+- name: start ntp service on ubuntu
+  ansible.builtin.service:
+    name: ntp
+    state: started
+    enabled: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: dump file
+  ansible.builtin.copy:
+    src: myfile.txt
+    dest: /tmp/myfile.txt
+
+- name: create a folder
+  file:
+     path: /tmp/captaingab
+     state: directory
+
+- name: Deploy ntp agent conf on centos
+  template:
+    src: ntpconf_centos.j2
+    dest: /etc/chrony.conf
+    backup: yes
+  when: ansible_distribution == "CentOS"
+  notify:
+    - restart chronyd service on centos
+
+- name: Deploy ntp agent conf on ubuntu
+  template:
+    src: ntpconf_ubuntu.j2
+    dest: /etc/ntp.conf
+    backup: yes
+  when: ansible_distribution == "Ubuntu"
+  notify:
+    - restart ntp service on ubuntu
+

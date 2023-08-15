@@ -1,0 +1,45 @@
+---
+- name: provisioning server
+  hosts: all 
+  become: yes
+  tasks:
+    - name: installing packges on centos
+      ansible.builtin.yum:
+        name: "{{item}}"
+        state: present 
+      when: ansible_distribution == "CentOS"
+      loop:
+        - chrony
+        - wget
+        - git
+        - zip
+        - unzip
+
+    - name: install ntp on ubuntu os 
+      ansible.builtin.apt:
+        name: "{{item}}" 
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+      loop:
+        - ntp
+        - wget
+        - git
+        - zip
+        - unzip
+
+    - name: start chrony service on centos
+      ansible.builtin.service:
+        name: chronyd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+
+    - name: start ntp service on ubuntu
+      ansible.builtin.service:
+        name: ntp
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+     

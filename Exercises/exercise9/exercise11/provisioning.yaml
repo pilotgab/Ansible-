@@ -1,0 +1,33 @@
+---
+- name: provisioning server
+  hosts: all 
+  become: yes
+  tasks:
+    - name: installing ntp agent on centos
+      ansible.builtin.yum:
+        name: chrony
+        state: present 
+      when: ansible_distribution == "CentOS"
+
+    - name: install ntp on ubuntu os 
+      ansible.builtin.apt:
+        name: ntp 
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: start chrony service on centos
+      ansible.builtin.service:
+        name: chronyd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+
+    - name: start ntp service on ubuntu
+      ansible.builtin.service:
+        name: ntp
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+     

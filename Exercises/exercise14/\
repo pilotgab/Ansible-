@@ -1,0 +1,92 @@
+---
+- name: provisioning server
+  hosts: all 
+  become: yes
+  tasks:
+    - name: installing packges on centos
+      ansible.builtin.yum:
+        name: "{{item}}"
+        state: present 
+      when: ansible_distribution == "CentOS"
+      loop:
+        - chrony
+        - wget
+        - git
+        - zip
+        - unzip
+
+    - name: install ntp on ubuntu os 
+      ansible.builtin.apt:
+        name: "{{item}}" 
+        state: present
+        update_cache: yes
+      when: ansible_distribution == "Ubuntu"
+      loop:
+        - ntp
+        - wget
+        - git
+        - zip
+        - unzip
+
+    - name: start chronyd service on centos
+      service:
+        name: chronyd
+        state: started
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+    - name: start ntp service on ubuntu
+      ansible.builtin.service:
+        name: ntp
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: dump file 
+      ansible.builtin.copy:
+        file: files/myfile.txt
+        dest: /tmp/myfile.txt
+
+    - name: create a folder
+      file:
+         path: /tmp/captaingab
+         state: directory
+
+    - name: Deploy ntp agent conf on centos
+      template:
+        src: templates/ntpconf_centos
+        dest: /etc/chrony.conf
+        backup: yes
+      when: ansible_distribution == "CentOS"
+      notify:
+        - restart chronyd service on centos
+
+    - name: Deploy ntp agent conf on ubuntu
+      template:
+        src: templates/ntpconf_ubuntu
+        dest: /etc/ntp.conf
+        backup: yes
+      when: ansible_distribution == "Ubuntu"
+      notify:
+        - restart ntp service on ubuntu
+
+
+  handlers:
+
+    - name: restart ntp service on ubuntu
+      ansible.builtin.service:
+        name: ntp
+        state: restarted
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: restart chronyd service on centos
+      ansible.builtin.service:
+        name: chronyd
+        state: restarted
+        enabled: yes
+      when: ansible_distribution == "CentOS"
+
+        
+
+

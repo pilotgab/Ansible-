@@ -1,0 +1,17 @@
+---
+- name: printing facts
+  hosts: all
+  become: yes
+  tasks:
+    - name: print os
+      debug:
+        var: ansible_distribution
+
+    - name: print ram memory
+      debug:
+        var: ansible_memory_mb.real
+
+
+    - name: print processor
+      debug:
+        var: ansible_processor[2]

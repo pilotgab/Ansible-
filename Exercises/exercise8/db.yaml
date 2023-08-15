@@ -1,0 +1,49 @@
+---
+
+- name: DBserver
+  hosts: dbservers
+  become: yes
+  vars:
+    dbname: electric
+    dbuser: current 
+    dbpass: admin123
+  tasks:
+    - name: install mariadb-server
+      ansible.builtin.yum:
+        name: mariadb-server
+        state: present
+
+    
+    - name: intalling pymsql
+      ansible.builtin.yum:
+        name: python3-PyMySQL
+        state: present
+
+    
+    - name: start mariadb service
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+
+    - name: Create a new database
+      community.mysql.mysql_db:
+        name: "{{dbname}}"
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+
+    - name: Create database
+      community.mysql.mysql_user:
+        name: "{{dbuser}}"
+        password: "{{dbpass}}"
+        priv: '*.*:ALL'
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+      register: dbout 
+
+    - name: printing dbout variable
+      debug:
+        var: dbout
+
+      

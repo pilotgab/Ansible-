@@ -1,0 +1,10 @@
+---
+- name: provisioning server
+  hosts: all 
+  become: yes
+  roles:
+    - geerlingguy.java
+    - post-install 
+
+
+

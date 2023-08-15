@@ -1,0 +1,23 @@
+---
+- name: Understanding variable
+  hosts: all
+  become: yes
+    #gather_facts: False
+  vars:
+    USRM: CAPTAIN-DAN
+    COM: this is from playbook
+  tasks:
+    - name: create user
+      ansible.builtin.user:
+        name: "{{USRM}}"
+        comment: "{{COM}}"
+      register: usrout
+
+    - name: printing usrout
+      debug:
+        var: usrout.name
+
+
+    - name: printing ursout comment 
+      debug:
+        var: usrout.comment
